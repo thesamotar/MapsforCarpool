@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Route Optimizer</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="app.js" type="module" defer></script>
+</head>
+
+<body>
+    <div id="app-container">
+        <div id="sidebar">
+            <h1>Route Optimizer</h1>
+
+            <div class="input-group">
+                <label for="start-container">Start Address</label>
+                <div id="start-container" class="autocomplete-container"></div>
+            </div>
+
+            <div id="waypoints-container">
+                <label>Intermediate Stops (Max 8)</label>
+                <!-- Waypoint inputs will be added here -->
+            </div>
+            <button id="add-waypoint" class="secondary-btn">+ Add Stop</button>
+
+            <div class="input-group">
+                <label for="end-container">End Address</label>
+                <div id="end-container" class="autocomplete-container"></div>
+            </div>
+
+            <button id="optimize-btn" class="primary-btn">Optimize Route</button>
+
+            <div id="output-panel" class="hidden">
+                <h3>Optimized Route</h3>
+                <ol id="route-list"></ol>
+            </div>
+        </div>
+        <div id="map"></div>
+    </div>
+</body>
+
+</html>
