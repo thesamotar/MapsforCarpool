@@ -63,7 +63,6 @@ The app uses Google's Directions API with waypoint optimization to minimize trav
 npm run build
 ```
 
-The production-ready files will be in the `dist` directory.
 
 ## Project Structure
 
@@ -121,26 +120,11 @@ Get your API key at: https://console.cloud.google.com/
 - 🎨 Clean, modern UI with responsive design
 - ⚙️ Environment variable support for API key management
 
-## Browser Support
-
-- Chrome (recommended)
-- Firefox
-- Safari
-- Edge
-
-Modern browsers with ES6+ support required.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
-
 This project is open source and available under the MIT License.
 
 ## Author
-
-**Abhishek**
 - GitHub: [@thesamotar](https://github.com/thesamotar)
 
 ## Acknowledgments
@@ -149,5 +133,3 @@ This project is open source and available under the MIT License.
 - Vite for the fast development build tool
 
 ---
-
-**Note**: Remember to keep your API key secure and never commit it to version control. Always use environment variables for sensitive data.
