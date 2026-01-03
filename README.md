@@ -1,0 +1,153 @@
+# Maps for Carpool
+
+A web application for optimizing carpool routes with multiple stops. Built with vanilla JavaScript and Google Maps API, this tool helps you find the most efficient route when picking up or dropping off multiple passengers.
+
+## Features
+
+- 🗺️ **Interactive Map Interface** - Visual route planning with Google Maps
+- 📍 **Smart Location Search** - Google Places autocomplete for easy address input
+- 🎯 **Route Optimization** - Automatically calculates the most efficient route order
+- 🔢 **Numbered Markers** - Visual indicators showing the optimized stop sequence
+- ➕ **Multiple Waypoints** - Support for up to 8 intermediate stops
+- 📱 **Responsive Design** - Clean, modern UI that works on all devices
+- 🌍 **Geolocation** - Automatically centers map on your current location
+
+## How It Works
+
+1. **Enter Start Location** - Type your starting address and select from autocomplete suggestions
+2. **Add Intermediate Stops** - Click "+ Add Stop" to add passenger pickup/dropoff locations (up to 8)
+3. **Enter End Location** - Type your final destination
+4. **Optimize Route** - Click "Suggest Optimal Route" to calculate the best path
+5. **View Results** - See numbered markers on the map and an ordered list of stops in the sidebar
+
+The app uses Google's Directions API with waypoint optimization to minimize travel time and distance.
+
+## Technology Stack
+
+- **Frontend**: HTML5, CSS3, Vanilla JavaScript (ES6+)
+- **Build Tool**: Vite
+- **APIs**: 
+  - Google Maps JavaScript API
+  - Google Places API
+  - Google Directions API
+- **Markers**: Google Maps Advanced Marker Element with Pin Element
+
+## Setup & Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/thesamotar/MapsforCarpool.git
+   cd MapsforCarpool
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Create a `.env` file in the root directory and add your Google Maps API key:
+   ```
+   VITE_GOOGLE_MAPS_API_KEY=your_api_key_here
+   ```
+
+4. Run the development server:
+   ```bash
+   npm run dev
+   ```
+
+5. Open your browser and navigate to `http://localhost:5173`
+
+## Building for Production
+
+```bash
+npm run build
+```
+
+The production-ready files will be in the `dist` directory.
+
+## Project Structure
+
+```
+MapsforCarpool/
+├── app.js           # Main application logic
+├── index.html       # HTML structure
+├── style.css        # Styling
+├── package.json     # Dependencies and scripts
+├── .env            # Environment variables (API key)
+└── README.md       # This file
+```
+
+## API Requirements
+
+This application requires a Google Maps API key with the following APIs enabled:
+- Maps JavaScript API
+- Places API
+- Directions API
+
+Get your API key at: https://console.cloud.google.com/
+
+## Version History
+
+### Version 1.2.0 - January 3, 2026 (Commit: 694cde1)
+**Added numbered markers and updated branding**
+- ✨ Added custom numbered markers for route stops
+  - Blue markers (#4285F4) for intermediate stops
+  - Red marker (#EA4335) for final destination
+  - Markers display stop sequence (1, 2, 3, etc.)
+- 🏷️ Updated app name from "Route Optimizer" to "Maps for Carpool"
+- 🔘 Changed button text to "Suggest Optimal Route"
+- 💡 Implemented AdvancedMarkerElement with PinElement for modern marker styling
+- 🧹 Added clearMarkers() function to remove old markers before displaying new route
+- 📍 Markers include tooltips showing stop number and full address
+
+### Version 1.1.0 - January 3, 2026 (Commit: d7b9a3f)
+**Fixed autocomplete event handling for Google Maps API updates**
+- 🐛 Fixed critical bug where start and end locations weren't being captured
+- 🔄 Updated event name from deprecated `gmp-placeselect` to `gmp-select`
+- 🔧 Changed event handling to use `event.placePrediction.toPlace()` instead of `event.place`
+- 📝 Added comprehensive error handling and logging for debugging
+- ✅ Fixed location capture for start, end, and waypoint inputs
+- 🔍 Added detailed console logging to track place selection events
+
+### Version 1.0.0 - January 1, 2026 (Commit: 2ff33c3)
+**Initial Release**
+- 🎉 Initial implementation of Maps for Carpool
+- 🗺️ Google Maps integration with interactive map display
+- 📍 Google Places autocomplete for address input
+- 🛣️ Route optimization using Google Directions API
+- ➕ Dynamic waypoint addition (up to 8 intermediate stops)
+- 📋 Sidebar display of optimized route order
+- 🌍 Geolocation support to center map on user's location
+- 🎨 Clean, modern UI with responsive design
+- ⚙️ Environment variable support for API key management
+
+## Browser Support
+
+- Chrome (recommended)
+- Firefox
+- Safari
+- Edge
+
+Modern browsers with ES6+ support required.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is open source and available under the MIT License.
+
+## Author
+
+**Abhishek**
+- GitHub: [@thesamotar](https://github.com/thesamotar)
+
+## Acknowledgments
+
+- Google Maps Platform for providing the mapping and routing APIs
+- Vite for the fast development build tool
+
+---
+
+**Note**: Remember to keep your API key secure and never commit it to version control. Always use environment variables for sensitive data.
