@@ -6,6 +6,7 @@ let directionsService;
 let directionsRenderer;
 let maxWaypoints = 8;
 let waypointCount = 0;
+let markers = []; // Store custom markers for numbered route points
 
 // Store selected places with their GPS coordinates
 const routePoints = {
@@ -50,7 +51,9 @@ async function initializeMap() {
 
     // Initialize directions service and renderer
     directionsService = new DirectionsService();
-    directionsRenderer = new DirectionsRenderer();
+    directionsRenderer = new DirectionsRenderer({
+        suppressMarkers: true // We'll add custom numbered markers
+    });
     directionsRenderer.setMap(map);
 
     // Try to get user's current location
@@ -346,6 +349,64 @@ async function optimizeAndDisplayRoute() {
 }
 
 /**
+ * Clear all existing markers from the map
+ */
+function clearMarkers() {
+    markers.forEach(marker => marker.setMap(null));
+    markers = [];
+}
+
+/**
+ * Create numbered markers for the route
+ */
+async function createNumberedMarkers(route) {
+    const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
+    const legs = route.legs;
+
+    // Add marker for each stop
+    legs.forEach((leg, index) => {
+        // Create a pin with a number
+        const pinElement = new PinElement({
+            glyph: `${index + 1}`,
+            glyphColor: "white",
+            background: "#4285F4",
+            borderColor: "#1a73e8",
+            scale: 1.2
+        });
+
+        // Create marker at the start of this leg
+        const marker = new AdvancedMarkerElement({
+            map: map,
+            position: leg.start_location,
+            content: pinElement.element,
+            title: `Stop ${index + 1}: ${leg.start_address}`
+        });
+
+        markers.push(marker);
+
+        // Add the final destination marker after the last leg
+        if (index === legs.length - 1) {
+            const finalPinElement = new PinElement({
+                glyph: `${index + 2}`,
+                glyphColor: "white",
+                background: "#EA4335",
+                borderColor: "#c5221f",
+                scale: 1.2
+            });
+
+            const finalMarker = new AdvancedMarkerElement({
+                map: map,
+                position: leg.end_location,
+                content: finalPinElement.element,
+                title: `Stop ${index + 2}: ${leg.end_address}`
+            });
+
+            markers.push(finalMarker);
+        }
+    });
+}
+
+/**
  * Display the optimized route order in the sidebar
  */
 function displayOptimizedOrder(response) {
@@ -357,6 +418,10 @@ function displayOptimizedOrder(response) {
     outputPanel.classList.remove('hidden');
 
     const legs = route.legs;
+
+    // Clear old markers and add new numbered markers
+    clearMarkers();
+    createNumberedMarkers(route);
 
     // Display each leg of the journey
     legs.forEach((leg, index) => {
