@@ -7,6 +7,7 @@ A web application for optimizing carpool routes with multiple stops. Built with 
 - 🗺️ **Interactive Map Interface** - Visual route planning with Google Maps
 - 📍 **Smart Location Search** - Google Places autocomplete for easy address input
 - 🎯 **Route Optimization** - Automatically calculates the most efficient route order
+- 🎨 **Color-Coded Route Segments** - Each leg of the journey displayed in a distinct color
 - 🔢 **Numbered Markers** - Visual indicators showing the optimized stop sequence
 - ➕ **Multiple Waypoints** - Support for up to 8 intermediate stops
 - 📱 **Responsive Design** - Clean, modern UI that works on all devices
@@ -86,6 +87,21 @@ This application requires a Google Maps API key with the following APIs enabled:
 Get your API key at: https://console.cloud.google.com/
 
 ## Version History
+
+### Version 1.3.0 - January 4, 2026 (Commit: 90606fc)
+**Added color-coded route segments and visual indicators**
+- 🎨 Implemented custom colored polylines for each route segment
+  - Each leg of the journey displays in a distinct, vibrant color
+  - 10 high-contrast colors optimized for map visibility
+  - Colors: Crimson Red, Dodger Blue, Dark Orange, Medium Purple, Light Sea Green, Deep Pink, Royal Blue, Lime Green, Orange Red, Dark Magenta
+- 🔄 Suppressed default DirectionsRenderer polylines for custom rendering
+- 🎯 Updated route list with colored circle indicators
+  - Colored dots in sidebar match route segment colors on map
+  - Replaced serial numbers with visual color-coding
+  - Final destination highlighted with red indicator and bold text
+- 📚 Imported Google Maps geometry library for polyline decoding
+- 🧹 Added clearPolylines() function to manage route updates
+- ✨ Enhanced visual correlation between map and route list
 
 ### Version 1.2.0 - January 3, 2026 (Commit: 694cde1)
 **Added numbered markers and updated branding**
