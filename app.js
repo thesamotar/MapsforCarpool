@@ -576,10 +576,16 @@ function displayOptimizedOrder(response, routeData) {
         const li = document.createElement('li');
         li.style.listStyle = 'none';
         li.style.display = 'flex';
-        li.style.alignItems = 'center';
-        li.style.gap = '10px';
-        li.style.padding = '10px 0';
+        li.style.flexDirection = 'column';
+        li.style.gap = '5px';
+        li.style.padding = '12px 0';
         li.style.borderBottom = '1px solid #f0f0f0';
+
+        // Container for line and route text
+        const routeContainer = document.createElement('div');
+        routeContainer.style.display = 'flex';
+        routeContainer.style.alignItems = 'center';
+        routeContainer.style.gap = '10px';
 
         // Create colored line indicator
         const colorLine = document.createElement('span');
@@ -597,10 +603,39 @@ function displayOptimizedOrder(response, routeData) {
         textSpan.textContent = `${shortenAddress(fromPlace)} → ${shortenAddress(toPlace)}`;
         textSpan.style.fontSize = '0.9rem';
         textSpan.style.lineHeight = '1.4';
+        textSpan.style.fontWeight = '500';
         textSpan.title = `${fromPlace} to ${toPlace}`; // Show full names on hover
 
-        li.appendChild(colorLine);
-        li.appendChild(textSpan);
+        routeContainer.appendChild(colorLine);
+        routeContainer.appendChild(textSpan);
+
+        // Create distance and time info
+        const infoContainer = document.createElement('div');
+        infoContainer.style.display = 'flex';
+        infoContainer.style.gap = '15px';
+        infoContainer.style.marginLeft = '40px'; // Align with text
+        infoContainer.style.fontSize = '0.8rem';
+        infoContainer.style.color = '#666';
+
+        // Distance
+        const distanceSpan = document.createElement('span');
+        distanceSpan.textContent = `📍 ${leg.distance.text}`;
+        distanceSpan.style.display = 'flex';
+        distanceSpan.style.alignItems = 'center';
+        distanceSpan.style.gap = '4px';
+
+        // Duration
+        const durationSpan = document.createElement('span');
+        durationSpan.textContent = `⏱️ ${leg.duration.text}`;
+        durationSpan.style.display = 'flex';
+        durationSpan.style.alignItems = 'center';
+        durationSpan.style.gap = '4px';
+
+        infoContainer.appendChild(distanceSpan);
+        infoContainer.appendChild(durationSpan);
+
+        li.appendChild(routeContainer);
+        li.appendChild(infoContainer);
         orderList.appendChild(li);
     });
 
