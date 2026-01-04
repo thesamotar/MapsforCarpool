@@ -88,6 +88,23 @@ Get your API key at: https://console.cloud.google.com/
 
 ## Version History
 
+### Version 1.5.0 - January 4, 2026 (Commit: 6971479)
+**Added distance and duration display for route segments**
+- 📏 Added distance information for each route segment
+  - Displays distance in appropriate units (km/mi)
+  - Example: "📍 3.2 km"
+- ⏱️ Added duration/travel time for each segment
+  - Shows estimated travel time based on current traffic
+  - Example: "⏱️ 8 mins"
+- 🎨 Enhanced route list layout
+  - Two-line layout for each segment
+  - Top line: colored line + route segment
+  - Bottom line: distance and time info (indented)
+  - Route text now bold for better readability
+- 📊 Data sourced from Google Directions API
+  - Accurate distance and time calculations
+  - Takes into account traffic conditions and road types
+
 ### Version 1.4.0 - January 4, 2026 (Commit: a9d8c48)
 **Fixed place name display and redesigned route list UI**
 - 🏷️ Fixed place name display to show actual names instead of geocoded addresses
