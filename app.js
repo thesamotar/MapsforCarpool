@@ -7,6 +7,7 @@ let directionsRenderer;
 let maxWaypoints = 8;
 let waypointCount = 0;
 let markers = []; // Store custom markers for numbered route points
+let polylines = []; // Store colored polylines for route segments
 
 // Store selected places with their GPS coordinates
 const routePoints = {
@@ -35,6 +36,7 @@ async function initializeMap() {
     // Load required Google Maps libraries
     const { Map } = await google.maps.importLibrary("maps");
     const { DirectionsService, DirectionsRenderer } = await google.maps.importLibrary("routes");
+    await google.maps.importLibrary("geometry"); // For polyline decoding
 
     // Default location (fallback if geolocation fails)
     const defaultLocation = { lat: 37.7749, lng: -122.4194 };
@@ -52,7 +54,8 @@ async function initializeMap() {
     // Initialize directions service and renderer
     directionsService = new DirectionsService();
     directionsRenderer = new DirectionsRenderer({
-        suppressMarkers: true // We'll add custom numbered markers
+        suppressMarkers: true, // We'll add custom numbered markers
+        suppressPolylines: true // We'll add custom colored polylines
     });
     directionsRenderer.setMap(map);
 
@@ -357,6 +360,53 @@ function clearMarkers() {
 }
 
 /**
+ * Clear all existing polylines from the map
+ */
+function clearPolylines() {
+    polylines.forEach(polyline => polyline.setMap(null));
+    polylines = [];
+}
+
+/**
+ * Create colored polylines for each route segment
+ */
+function createColoredPolylines(route) {
+    // Array of distinct, darker colors for better visibility on maps
+    const colors = [
+        '#DC143C', // Crimson Red
+        '#1E90FF', // Dodger Blue
+        '#FF8C00', // Dark Orange
+        '#9370DB', // Medium Purple
+        '#20B2AA', // Light Sea Green
+        '#FF1493', // Deep Pink
+        '#4169E1', // Royal Blue
+        '#32CD32', // Lime Green
+        '#FF4500', // Orange Red
+        '#8B008B'  // Dark Magenta
+    ];
+
+    const legs = route.legs;
+
+    // Create a polyline for each leg with a different color
+    legs.forEach((leg, index) => {
+        const path = leg.steps.flatMap(step =>
+            google.maps.geometry.encoding.decodePath(step.polyline.points)
+        );
+
+        const polyline = new google.maps.Polyline({
+            path: path,
+            geodesic: true,
+            strokeColor: colors[index % colors.length],
+            strokeOpacity: 0.8,
+            strokeWeight: 5,
+            map: map
+        });
+
+        polylines.push(polyline);
+    });
+}
+
+/**
  * Create numbered markers for the route
  */
 async function createNumberedMarkers(route) {
@@ -419,20 +469,73 @@ function displayOptimizedOrder(response) {
 
     const legs = route.legs;
 
-    // Clear old markers and add new numbered markers
-    clearMarkers();
-    createNumberedMarkers(route);
+    // Same color array as used in polylines
+    const colors = [
+        '#DC143C', '#1E90FF', '#FF8C00', '#9370DB', '#20B2AA',
+        '#FF1493', '#4169E1', '#32CD32', '#FF4500', '#8B008B'
+    ];
 
-    // Display each leg of the journey
+    // Clear old markers and polylines, then add new ones
+    clearMarkers();
+    clearPolylines();
+    createNumberedMarkers(route);
+    createColoredPolylines(route);
+
+    // Display each leg of the journey with colored indicators
     legs.forEach((leg, index) => {
         const li = document.createElement('li');
-        li.textContent = `${index + 1}. ${leg.start_address}`;
+        li.style.listStyle = 'none';
+        li.style.display = 'flex';
+        li.style.alignItems = 'center';
+        li.style.gap = '10px';
+        li.style.padding = '8px 0';
+        li.style.borderBottom = '1px solid #f0f0f0';
+
+        // Create colored circle indicator
+        const colorIndicator = document.createElement('span');
+        colorIndicator.style.width = '16px';
+        colorIndicator.style.height = '16px';
+        colorIndicator.style.borderRadius = '50%';
+        colorIndicator.style.backgroundColor = colors[index % colors.length];
+        colorIndicator.style.flexShrink = '0';
+        colorIndicator.style.border = '2px solid #fff';
+        colorIndicator.style.boxShadow = '0 1px 3px rgba(0,0,0,0.3)';
+
+        // Create text content
+        const textSpan = document.createElement('span');
+        textSpan.textContent = leg.start_address;
+        textSpan.style.fontSize = '0.95rem';
+
+        li.appendChild(colorIndicator);
+        li.appendChild(textSpan);
         orderList.appendChild(li);
 
         // Add the final destination after the last leg
         if (index === legs.length - 1) {
             const lastLi = document.createElement('li');
-            lastLi.textContent = `${index + 2}. ${leg.end_address}`;
+            lastLi.style.listStyle = 'none';
+            lastLi.style.display = 'flex';
+            lastLi.style.alignItems = 'center';
+            lastLi.style.gap = '10px';
+            lastLi.style.padding = '8px 0';
+
+            // Final destination gets a special marker (no color, just a flag icon or different style)
+            const finalIndicator = document.createElement('span');
+            finalIndicator.style.width = '16px';
+            finalIndicator.style.height = '16px';
+            finalIndicator.style.borderRadius = '50%';
+            finalIndicator.style.backgroundColor = '#EA4335'; // Red for final destination
+            finalIndicator.style.flexShrink = '0';
+            finalIndicator.style.border = '2px solid #fff';
+            finalIndicator.style.boxShadow = '0 1px 3px rgba(0,0,0,0.3)';
+
+            const finalTextSpan = document.createElement('span');
+            finalTextSpan.textContent = leg.end_address;
+            finalTextSpan.style.fontSize = '0.95rem';
+            finalTextSpan.style.fontWeight = '600';
+
+            lastLi.appendChild(finalIndicator);
+            lastLi.appendChild(finalTextSpan);
             orderList.appendChild(lastLi);
         }
     });

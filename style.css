@@ -125,12 +125,7 @@ button {
 }
 
 #route-list {
-    list-style-position: inside;
+    list-style: none;
     margin-top: 10px;
-}
-
-#route-list li {
-    padding: 5px 0;
-    border-bottom: 1px solid #f0f0f0;
-    font-size: 0.95rem;
+    padding: 0;
 }
