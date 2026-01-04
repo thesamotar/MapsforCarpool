@@ -88,6 +88,30 @@ Get your API key at: https://console.cloud.google.com/
 
 ## Version History
 
+### Version 1.4.0 - January 4, 2026 (Commit: a9d8c48)
+**Fixed place name display and redesigned route list UI**
+- 🏷️ Fixed place name display to show actual names instead of geocoded addresses
+  - Now uses `displayName` instead of `formattedAddress` from Google Places API
+  - Correctly displays "Loyola School" instead of "Q7G3+CFC, Telco Colony"
+  - Preserves user-entered place names throughout the route optimization
+- 🎨 Redesigned route list to "Place A → Place B" format
+  - Changed from individual stop listing to segment-based display
+  - Shows journey segments: "School → Park → Museum"
+  - Clearer visualization of the route progression
+- 📏 Replaced colored dots with colored horizontal lines
+  - 30px × 4px colored lines with rounded corners
+  - Better visual correlation with route segments on map
+  - More modern and compact design
+- ✂️ Added intelligent address shortening
+  - `shortenAddress()` function handles both place names and street addresses
+  - Keeps place names under 35 characters for readability
+  - Preserves key information (street number, city) for addresses
+  - Full names shown on hover tooltips
+- 🔄 Enhanced route data handling
+  - Pass original place names through `routeData` object
+  - Build `orderedNames` array respecting waypoint optimization
+  - Maintain name-to-location mapping throughout optimization
+
 ### Version 1.3.0 - January 4, 2026 (Commit: 90606fc)
 **Added color-coded route segments and visual indicators**
 - 🎨 Implemented custom colored polylines for each route segment
