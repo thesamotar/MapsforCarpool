@@ -117,7 +117,7 @@ async function setupAutocompleteInputs() {
             if (place.location) {
                 routePoints.start = {
                     location: place.location,
-                    address: place.formattedAddress || place.displayName
+                    address: place.displayName || place.formattedAddress
                 };
                 console.log("✓ Start location captured:", routePoints.start);
             } else {
@@ -163,7 +163,7 @@ async function setupAutocompleteInputs() {
             if (place.location) {
                 routePoints.end = {
                     location: place.location,
-                    address: place.formattedAddress || place.displayName
+                    address: place.displayName || place.formattedAddress
                 };
                 console.log("✓ End location captured:", routePoints.end);
             } else {
@@ -232,7 +232,7 @@ async function addWaypoint() {
             if (place.location) {
                 routePoints.waypoints.set(id, {
                     location: place.location,
-                    address: place.formattedAddress || place.displayName
+                    address: place.displayName || place.formattedAddress
                 });
                 console.log(`✓ Waypoint ${id} captured:`, routePoints.waypoints.get(id));
             } else {
@@ -288,14 +288,16 @@ function handleInputs() {
         return null;
     }
 
-    // Gather waypoints
+    // Gather waypoints with their original names
     const waypoints = [];
+    const waypointNames = [];
     routePoints.waypoints.forEach((point, id) => {
         if (point && point.location) {
             waypoints.push({
                 location: point.location,
                 stopover: true
             });
+            waypointNames.push(point.address);
         }
     });
 
@@ -308,7 +310,11 @@ function handleInputs() {
     return {
         origin: routePoints.start.location,
         destination: routePoints.end.location,
-        waypoints: waypoints
+        waypoints: waypoints,
+        // Store original names for display
+        originName: routePoints.start.address,
+        destinationName: routePoints.end.address,
+        waypointNames: waypointNames
     };
 }
 
@@ -339,8 +345,8 @@ async function optimizeAndDisplayRoute() {
                 // Display the route on the map
                 directionsRenderer.setDirections(response);
 
-                // Display the optimized order in the sidebar
-                displayOptimizedOrder(response);
+                // Display the optimized order in the sidebar with original names
+                displayOptimizedOrder(response, routeData);
 
                 console.log("Route optimized successfully");
             } else {
@@ -456,10 +462,72 @@ async function createNumberedMarkers(route) {
     });
 }
 
+
+/**
+ * Shorten address to key identifying parts
+ * Handles both place names (schools, museums, etc.) and street addresses
+ */
+function shortenAddress(fullAddress) {
+    if (!fullAddress) return '';
+
+    // Split address by commas
+    const parts = fullAddress.split(',').map(part => part.trim());
+
+    if (parts.length === 0) return fullAddress;
+
+    const firstPart = parts[0];
+    const secondPart = parts[1] || '';
+
+    // Check if first part looks like a place name (not starting with a number)
+    // Place names: "Central Park", "Google Headquarters", "St. Mary's Church"
+    // Street addresses: "123 Main St", "456 Oak Avenue"
+    const isPlaceName = !/^\d/.test(firstPart);
+
+    if (isPlaceName) {
+        // It's a place name
+        // If the full place name is short enough, just return it
+        if (firstPart.length <= 35) {
+            return firstPart;
+        }
+        // If place name is long, shorten it but try to keep meaningful words
+        const shortened = firstPart.substring(0, 32) + '...';
+        return shortened;
+    }
+
+    // It's a street address - extract street and city
+    if (parts.length >= 2) {
+        const street = firstPart;
+        const city = secondPart;
+
+        // If street is too long, try to shorten it
+        let shortStreet = street;
+        if (street.length > 25) {
+            // Try to extract just the street number and first part of street name
+            const streetMatch = street.match(/^(\d+\s+\w+)/);
+            if (streetMatch) {
+                shortStreet = streetMatch[1] + '...';
+            } else {
+                shortStreet = street.substring(0, 22) + '...';
+            }
+        }
+
+        // Shorten city if needed
+        let shortCity = city;
+        if (city.length > 15) {
+            shortCity = city.substring(0, 12) + '...';
+        }
+
+        return `${shortStreet}, ${shortCity}`;
+    }
+
+    // Fallback: if address is short enough, return as is, otherwise truncate
+    return fullAddress.length > 35 ? fullAddress.substring(0, 32) + '...' : fullAddress;
+}
+
 /**
  * Display the optimized route order in the sidebar
  */
-function displayOptimizedOrder(response) {
+function displayOptimizedOrder(response, routeData) {
     const route = response.routes[0];
     const orderList = document.getElementById('route-list');
     const outputPanel = document.getElementById('output-panel');
@@ -468,6 +536,28 @@ function displayOptimizedOrder(response) {
     outputPanel.classList.remove('hidden');
 
     const legs = route.legs;
+
+    // Build ordered list of original place names
+    // Start with origin
+    const orderedNames = [routeData.originName];
+
+    // Add waypoints in optimized order
+    if (route.waypoint_order && route.waypoint_order.length > 0) {
+        route.waypoint_order.forEach(index => {
+            orderedNames.push(routeData.waypointNames[index]);
+        });
+    } else if (routeData.waypointNames.length > 0) {
+        // If no optimization or no waypoints, add in original order
+        orderedNames.push(...routeData.waypointNames);
+    }
+
+    // Add destination
+    orderedNames.push(routeData.destinationName);
+
+    console.log("=== Route Display Debug ===");
+    console.log("Route Data:", routeData);
+    console.log("Ordered Names:", orderedNames);
+    console.log("Waypoint Order:", route.waypoint_order);
 
     // Same color array as used in polylines
     const colors = [
@@ -481,63 +571,37 @@ function displayOptimizedOrder(response) {
     createNumberedMarkers(route);
     createColoredPolylines(route);
 
-    // Display each leg of the journey with colored indicators
+    // Display each leg of the journey with colored line indicators
     legs.forEach((leg, index) => {
         const li = document.createElement('li');
         li.style.listStyle = 'none';
         li.style.display = 'flex';
         li.style.alignItems = 'center';
         li.style.gap = '10px';
-        li.style.padding = '8px 0';
+        li.style.padding = '10px 0';
         li.style.borderBottom = '1px solid #f0f0f0';
 
-        // Create colored circle indicator
-        const colorIndicator = document.createElement('span');
-        colorIndicator.style.width = '16px';
-        colorIndicator.style.height = '16px';
-        colorIndicator.style.borderRadius = '50%';
-        colorIndicator.style.backgroundColor = colors[index % colors.length];
-        colorIndicator.style.flexShrink = '0';
-        colorIndicator.style.border = '2px solid #fff';
-        colorIndicator.style.boxShadow = '0 1px 3px rgba(0,0,0,0.3)';
+        // Create colored line indicator
+        const colorLine = document.createElement('span');
+        colorLine.style.width = '30px';
+        colorLine.style.height = '4px';
+        colorLine.style.backgroundColor = colors[index % colors.length];
+        colorLine.style.flexShrink = '0';
+        colorLine.style.borderRadius = '2px';
+        colorLine.style.boxShadow = '0 1px 2px rgba(0,0,0,0.2)';
 
-        // Create text content
+        // Create text content - "Place A → Place B" format
+        const fromPlace = orderedNames[index];
+        const toPlace = orderedNames[index + 1];
         const textSpan = document.createElement('span');
-        textSpan.textContent = leg.start_address;
-        textSpan.style.fontSize = '0.95rem';
+        textSpan.textContent = `${shortenAddress(fromPlace)} → ${shortenAddress(toPlace)}`;
+        textSpan.style.fontSize = '0.9rem';
+        textSpan.style.lineHeight = '1.4';
+        textSpan.title = `${fromPlace} to ${toPlace}`; // Show full names on hover
 
-        li.appendChild(colorIndicator);
+        li.appendChild(colorLine);
         li.appendChild(textSpan);
         orderList.appendChild(li);
-
-        // Add the final destination after the last leg
-        if (index === legs.length - 1) {
-            const lastLi = document.createElement('li');
-            lastLi.style.listStyle = 'none';
-            lastLi.style.display = 'flex';
-            lastLi.style.alignItems = 'center';
-            lastLi.style.gap = '10px';
-            lastLi.style.padding = '8px 0';
-
-            // Final destination gets a special marker (no color, just a flag icon or different style)
-            const finalIndicator = document.createElement('span');
-            finalIndicator.style.width = '16px';
-            finalIndicator.style.height = '16px';
-            finalIndicator.style.borderRadius = '50%';
-            finalIndicator.style.backgroundColor = '#EA4335'; // Red for final destination
-            finalIndicator.style.flexShrink = '0';
-            finalIndicator.style.border = '2px solid #fff';
-            finalIndicator.style.boxShadow = '0 1px 3px rgba(0,0,0,0.3)';
-
-            const finalTextSpan = document.createElement('span');
-            finalTextSpan.textContent = leg.end_address;
-            finalTextSpan.style.fontSize = '0.95rem';
-            finalTextSpan.style.fontWeight = '600';
-
-            lastLi.appendChild(finalIndicator);
-            lastLi.appendChild(finalTextSpan);
-            orderList.appendChild(lastLi);
-        }
     });
 
     // If waypoints were optimized, log the new order
