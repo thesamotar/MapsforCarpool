@@ -20,10 +20,178 @@ const routePoints = {
 window.initApp = initApp;
 
 /**
+ * Initialize and apply theme
+ */
+function initializeTheme() {
+    // Check for saved theme preference or default to light mode
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeIcon(savedTheme);
+}
+
+/**
+ * Toggle between light and dark themes
+ */
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateThemeIcon(newTheme);
+
+    // Update map style if map is initialized
+    if (map) {
+        updateMapStyle(newTheme);
+    }
+}
+
+/**
+ * Update the theme toggle icon
+ */
+function updateThemeIcon(theme) {
+    const themeIcon = document.querySelector('.theme-icon');
+    if (themeIcon) {
+        themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+    }
+}
+
+/**
+ * Get dark mode map styles
+ */
+function getDarkMapStyles() {
+    return [
+        { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+        { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+        { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+        {
+            featureType: "administrative.locality",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#d59563" }],
+        },
+        {
+            featureType: "poi",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#d59563" }],
+        },
+        {
+            featureType: "poi.park",
+            elementType: "geometry",
+            stylers: [{ color: "#263c3f" }],
+        },
+        {
+            featureType: "poi.park",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#6b9a76" }],
+        },
+        {
+            featureType: "road",
+            elementType: "geometry",
+            stylers: [{ color: "#38414e" }],
+        },
+        {
+            featureType: "road",
+            elementType: "geometry.stroke",
+            stylers: [{ color: "#212a37" }],
+        },
+        {
+            featureType: "road",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#9ca5b3" }],
+        },
+        {
+            featureType: "road.highway",
+            elementType: "geometry",
+            stylers: [{ color: "#746855" }],
+        },
+        {
+            featureType: "road.highway",
+            elementType: "geometry.stroke",
+            stylers: [{ color: "#1f2835" }],
+        },
+        {
+            featureType: "road.highway",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#f3d19c" }],
+        },
+        {
+            featureType: "transit",
+            elementType: "geometry",
+            stylers: [{ color: "#2f3948" }],
+        },
+        {
+            featureType: "transit.station",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#d59563" }],
+        },
+        {
+            featureType: "water",
+            elementType: "geometry",
+            stylers: [{ color: "#17263c" }],
+        },
+        {
+            featureType: "water",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#515c6d" }],
+        },
+        {
+            featureType: "water",
+            elementType: "labels.text.stroke",
+            stylers: [{ color: "#17263c" }],
+        },
+    ];
+}
+
+/**
+ * Update map style based on theme
+ * Note: We need to recreate the map because Google Maps doesn't allow
+ * switching between mapId and custom styles on the same map instance
+ */
+async function updateMapStyle(theme) {
+    if (!map) return;
+
+    // Store current map state
+    const currentCenter = map.getCenter();
+    const currentZoom = map.getZoom();
+
+    // Recreate map with appropriate options
+    const { Map } = await google.maps.importLibrary("maps");
+
+    const mapOptions = {
+        zoom: currentZoom,
+        center: currentCenter,
+        mapTypeControl: false,
+        fullscreenControl: false,
+        streetViewControl: false
+    };
+
+    // Add mapId for light mode, styles for dark mode
+    if (theme === 'light') {
+        mapOptions.mapId = 'DEMO_MAP_ID';
+    } else {
+        mapOptions.styles = getDarkMapStyles();
+    }
+
+    map = new Map(document.getElementById("map"), mapOptions);
+
+    // Reattach directions renderer
+    if (directionsRenderer) {
+        directionsRenderer.setMap(map);
+    }
+
+    // Restore any existing markers
+    markers.forEach(marker => marker.map = map);
+
+    // Restore any existing polylines
+    polylines.forEach(polyline => polyline.setMap(map));
+}
+
+/**
  * Main initialization function
  */
 async function initApp() {
     console.log("Initializing application...");
+    initializeTheme();
     await initializeMap();
     await setupAutocompleteInputs();
     setupEventListeners();
@@ -42,14 +210,26 @@ async function initializeMap() {
     const defaultLocation = { lat: 37.7749, lng: -122.4194 };
 
     // Initialize map
-    map = new Map(document.getElementById("map"), {
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+
+    // Note: Google Maps doesn't allow both mapId and custom styles
+    // So we use mapId for light mode and custom styles for dark mode
+    const mapOptions = {
         zoom: 12,
         center: defaultLocation,
         mapTypeControl: false,
         fullscreenControl: false,
-        streetViewControl: false,
-        mapId: 'DEMO_MAP_ID'
-    });
+        streetViewControl: false
+    };
+
+    // Add mapId only for light mode, use styles for dark mode
+    if (currentTheme === 'light') {
+        mapOptions.mapId = 'DEMO_MAP_ID';
+    } else {
+        mapOptions.styles = getDarkMapStyles();
+    }
+
+    map = new Map(document.getElementById("map"), mapOptions);
 
     // Initialize directions service and renderer
     directionsService = new DirectionsService();
@@ -185,9 +365,11 @@ async function setupAutocompleteInputs() {
 function setupEventListeners() {
     const addWaypointBtn = document.getElementById('add-waypoint');
     const optimizeBtn = document.getElementById('optimize-btn');
+    const themeToggleBtn = document.getElementById('theme-toggle');
 
     addWaypointBtn.addEventListener('click', addWaypoint);
     optimizeBtn.addEventListener('click', optimizeAndDisplayRoute);
+    themeToggleBtn.addEventListener('click', toggleTheme);
 }
 
 /**
