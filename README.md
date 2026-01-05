@@ -90,6 +90,22 @@ Get your API key at: https://console.cloud.google.com/
 
 ## Version History
 
+### Version 1.8.0 - January 6, 2026 (Commit: 12634e5)
+**Added segment details, interactive route list, and fixed dark mode**
+- 📊 **Segment-Specific Info Card**
+  - Clicking a route segment now displays distance and time for *that specific leg*
+  - Automatically reverts to total route stats when clicking the map background
+  - Info card is completely hidden when no route data is displayed
+- 📱 **Interactive Route List**
+  - **Bidirectional Highlighting:**
+    - Clicking a map polyline automatically highlights and scrolls to the corresponding list item
+    - Clicking a list item highlights the corresponding segment on the map
+  - List items now visually indicate selection with a border and background change
+- 🌙 **Dark Mode Improvements**
+  - Fixed visibility issues in the "Optimized Route" list (moved inline styles to CSS)
+  - Text colors now properly adapt to dark theme (no more black-on-black text)
+  - Highlighted segments use theme-aware colors
+
 ### Version 1.7.0 - January 6, 2026 (Commit: 50a0a77)
 **Added interactive polyline highlighting and colored markers**
 - 🖱️ Interactive polyline click handlers
