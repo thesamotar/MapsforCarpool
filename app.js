@@ -707,6 +707,51 @@ function shortenAddress(fullAddress) {
 }
 
 /**
+ * Update the floating total info card with total distance and duration
+ */
+function updateTotalInfoCard(route) {
+    const totalInfoCard = document.getElementById('total-info-card');
+    const totalDistanceEl = document.getElementById('total-distance');
+    const totalDurationEl = document.getElementById('total-duration');
+
+    if (!route || !route.legs || route.legs.length === 0) {
+        totalInfoCard.classList.add('hidden');
+        return;
+    }
+
+    // Calculate total distance and duration
+    let totalDistanceMeters = 0;
+    let totalDurationSeconds = 0;
+
+    route.legs.forEach(leg => {
+        totalDistanceMeters += leg.distance.value;
+        totalDurationSeconds += leg.duration.value;
+    });
+
+    // Format distance (convert to km or mi)
+    const totalDistanceKm = totalDistanceMeters / 1000;
+    const distanceText = totalDistanceKm >= 1
+        ? `${totalDistanceKm.toFixed(1)} km`
+        : `${totalDistanceMeters} m`;
+
+    // Format duration
+    const hours = Math.floor(totalDurationSeconds / 3600);
+    const minutes = Math.floor((totalDurationSeconds % 3600) / 60);
+
+    let durationText = '';
+    if (hours > 0) {
+        durationText = `${hours} hr${hours > 1 ? 's' : ''} ${minutes} min${minutes !== 1 ? 's' : ''}`;
+    } else {
+        durationText = `${minutes} min${minutes !== 1 ? 's' : ''}`;
+    }
+
+    // Update the card
+    totalDistanceEl.textContent = distanceText;
+    totalDurationEl.textContent = durationText;
+    totalInfoCard.classList.remove('hidden');
+}
+
+/**
  * Display the optimized route order in the sidebar
  */
 function displayOptimizedOrder(response, routeData) {
@@ -820,6 +865,9 @@ function displayOptimizedOrder(response, routeData) {
         li.appendChild(infoContainer);
         orderList.appendChild(li);
     });
+
+    // Update the floating total info card
+    updateTotalInfoCard(route);
 
     // If waypoints were optimized, log the new order
     if (route.waypoint_order && route.waypoint_order.length > 0) {

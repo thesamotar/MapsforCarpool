@@ -66,6 +66,7 @@ body {
 }
 
 #map {
+    position: relative;
     flex-grow: 1;
     height: 100%;
 }
@@ -203,4 +204,73 @@ button {
     list-style: none;
     margin-top: 10px;
     padding: 0;
+}
+
+/* Floating Total Info Card */
+.total-info-card {
+    position: fixed;
+    top: 20px;
+    left: calc(350px + (100vw - 350px) / 2);
+    transform: translateX(-50%);
+    z-index: 1000;
+
+    /* Glassmorphism effect */
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    border-radius: 12px;
+    padding: 12px 20px;
+    box-shadow: 0 4px 12px var(--shadow-color), 0 2px 4px var(--shadow-medium);
+
+    display: flex;
+    gap: 24px;
+    align-items: center;
+
+    transition: all 0.3s ease;
+    animation: slideDown 0.4s ease-out;
+}
+
+[data-theme="dark"] .total-info-card {
+    background: rgba(26, 26, 26, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.total-info-card:hover {
+    transform: translateX(-50%) translateY(-2px);
+    box-shadow: 0 6px 16px var(--shadow-color), 0 3px 6px var(--shadow-medium);
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.95rem;
+}
+
+.info-icon {
+    font-size: 1.1rem;
+}
+
+.info-label {
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.info-value {
+    font-weight: 700;
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
 }
