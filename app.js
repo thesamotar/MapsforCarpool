@@ -40,10 +40,7 @@ function toggleTheme() {
     localStorage.setItem('theme', newTheme);
     updateThemeIcon(newTheme);
 
-    // Update map style if map is initialized
-    if (map) {
-        updateMapStyle(newTheme);
-    }
+    // No need to recreate the map - CSS filters handle the dark mode styling
 }
 
 /**
@@ -56,135 +53,7 @@ function updateThemeIcon(theme) {
     }
 }
 
-/**
- * Get dark mode map styles
- */
-function getDarkMapStyles() {
-    return [
-        { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
-        { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
-        { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
-        {
-            featureType: "administrative.locality",
-            elementType: "labels.text.fill",
-            stylers: [{ color: "#d59563" }],
-        },
-        {
-            featureType: "poi",
-            elementType: "labels.text.fill",
-            stylers: [{ color: "#d59563" }],
-        },
-        {
-            featureType: "poi.park",
-            elementType: "geometry",
-            stylers: [{ color: "#263c3f" }],
-        },
-        {
-            featureType: "poi.park",
-            elementType: "labels.text.fill",
-            stylers: [{ color: "#6b9a76" }],
-        },
-        {
-            featureType: "road",
-            elementType: "geometry",
-            stylers: [{ color: "#38414e" }],
-        },
-        {
-            featureType: "road",
-            elementType: "geometry.stroke",
-            stylers: [{ color: "#212a37" }],
-        },
-        {
-            featureType: "road",
-            elementType: "labels.text.fill",
-            stylers: [{ color: "#9ca5b3" }],
-        },
-        {
-            featureType: "road.highway",
-            elementType: "geometry",
-            stylers: [{ color: "#746855" }],
-        },
-        {
-            featureType: "road.highway",
-            elementType: "geometry.stroke",
-            stylers: [{ color: "#1f2835" }],
-        },
-        {
-            featureType: "road.highway",
-            elementType: "labels.text.fill",
-            stylers: [{ color: "#f3d19c" }],
-        },
-        {
-            featureType: "transit",
-            elementType: "geometry",
-            stylers: [{ color: "#2f3948" }],
-        },
-        {
-            featureType: "transit.station",
-            elementType: "labels.text.fill",
-            stylers: [{ color: "#d59563" }],
-        },
-        {
-            featureType: "water",
-            elementType: "geometry",
-            stylers: [{ color: "#17263c" }],
-        },
-        {
-            featureType: "water",
-            elementType: "labels.text.fill",
-            stylers: [{ color: "#515c6d" }],
-        },
-        {
-            featureType: "water",
-            elementType: "labels.text.stroke",
-            stylers: [{ color: "#17263c" }],
-        },
-    ];
-}
-
-/**
- * Update map style based on theme
- * Note: We need to recreate the map because Google Maps doesn't allow
- * switching between mapId and custom styles on the same map instance
- */
-async function updateMapStyle(theme) {
-    if (!map) return;
-
-    // Store current map state
-    const currentCenter = map.getCenter();
-    const currentZoom = map.getZoom();
-
-    // Recreate map with appropriate options
-    const { Map } = await google.maps.importLibrary("maps");
-
-    const mapOptions = {
-        zoom: currentZoom,
-        center: currentCenter,
-        mapTypeControl: false,
-        fullscreenControl: false,
-        streetViewControl: false
-    };
-
-    // Add mapId for light mode, styles for dark mode
-    if (theme === 'light') {
-        mapOptions.mapId = 'DEMO_MAP_ID';
-    } else {
-        mapOptions.styles = getDarkMapStyles();
-    }
-
-    map = new Map(document.getElementById("map"), mapOptions);
-
-    // Reattach directions renderer
-    if (directionsRenderer) {
-        directionsRenderer.setMap(map);
-    }
-
-    // Restore any existing markers
-    markers.forEach(marker => marker.map = map);
-
-    // Restore any existing polylines
-    polylines.forEach(polyline => polyline.setMap(map));
-}
+// Dark mode is now handled via CSS filters in style.css
 
 /**
  * Main initialization function
@@ -209,25 +78,16 @@ async function initializeMap() {
     // Default location (fallback if geolocation fails)
     const defaultLocation = { lat: 37.7749, lng: -122.4194 };
 
-    // Initialize map
-    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-
-    // Note: Google Maps doesn't allow both mapId and custom styles
-    // So we use mapId for light mode and custom styles for dark mode
+    // Initialize map with mapId for Advanced Markers support
+    // Dark mode styling is handled via CSS filters
     const mapOptions = {
         zoom: 12,
         center: defaultLocation,
         mapTypeControl: false,
         fullscreenControl: false,
-        streetViewControl: false
+        streetViewControl: false,
+        mapId: 'DEMO_MAP_ID'
     };
-
-    // Add mapId only for light mode, use styles for dark mode
-    if (currentTheme === 'light') {
-        mapOptions.mapId = 'DEMO_MAP_ID';
-    } else {
-        mapOptions.styles = getDarkMapStyles();
-    }
 
     map = new Map(document.getElementById("map"), mapOptions);
 

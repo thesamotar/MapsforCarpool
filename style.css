@@ -71,6 +71,18 @@ body {
     height: 100%;
 }
 
+/* Apply dark mode filter to map */
+[data-theme="dark"] #map {
+    filter: invert(90%) hue-rotate(180deg) brightness(0.9) contrast(0.9);
+}
+
+/* Invert the markers and controls back so they appear normal */
+[data-theme="dark"] #map gmp-advanced-marker,
+[data-theme="dark"] #map .gm-style-iw,
+[data-theme="dark"] #map .gm-control-active {
+    filter: invert(90%) hue-rotate(180deg) brightness(1.1) contrast(1.1);
+}
+
 .header {
     display: flex;
     justify-content: space-between;
