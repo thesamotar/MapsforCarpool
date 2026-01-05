@@ -89,6 +89,25 @@ Get your API key at: https://console.cloud.google.com/
 
 ## Version History
 
+### Version 1.6.2 - January 5, 2026 (Commit: c3bf16b)
+**Fixed dark mode implementation using CSS filters**
+- 🐛 Resolved conflict between `mapId` (required for Advanced Markers) and custom map styles
+  - Google Maps API doesn't allow custom `styles` property when `mapId` is present
+  - Previous approach caused markers to disappear when toggling themes
+- 🎨 Implemented CSS filter-based dark mode
+  - Applied `invert(90%) hue-rotate(180deg)` filters to map container
+  - Counter-inverted markers and controls to maintain normal appearance
+  - Eliminates need for map recreation on theme change
+- ✨ Improved theme toggle reliability
+  - Markers now remain visible when switching between light and dark modes
+  - No console errors or API warnings
+  - Smoother transition without map reinitialization
+- 🧹 Code cleanup and simplification
+  - Removed `getDarkMapStyles()` function (128 lines)
+  - Removed `updateMapStyle()` function (41 lines)
+  - Simplified `toggleTheme()` and `initializeMap()` functions
+  - Reduced complexity while maintaining full functionality
+
 ### Version 1.6.1 - January 5, 2026 (Commit: 8bd221c)
 **Fixed total distance and time info card display**
 - 🐛 Fixed critical bug where total info card was not appearing on the map
