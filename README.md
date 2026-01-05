@@ -8,7 +8,8 @@ A web application for optimizing carpool routes with multiple stops. Built with 
 - 📍 **Smart Location Search** - Google Places autocomplete for easy address input
 - 🎯 **Route Optimization** - Automatically calculates the most efficient route order
 - 🎨 **Color-Coded Route Segments** - Each leg of the journey displayed in a distinct color
-- 🔢 **Numbered Markers** - Visual indicators showing the optimized stop sequence
+- 🔢 **Colored Numbered Markers** - Visual indicators with unique colors matching route segments
+- 🖱️ **Interactive Polyline Highlighting** - Click any route segment to highlight it for better focus
 - ➕ **Multiple Waypoints** - Support for up to 8 intermediate stops
 - 📱 **Responsive Design** - Clean, modern UI that works on all devices
 - 🌍 **Geolocation** - Automatically centers map on your current location
@@ -88,6 +89,25 @@ This application requires a Google Maps API key with the following APIs enabled:
 Get your API key at: https://console.cloud.google.com/
 
 ## Version History
+
+### Version 1.7.0 - January 6, 2026 (Commit: 50a0a77)
+**Added interactive polyline highlighting and colored markers**
+- 🖱️ Interactive polyline click handlers
+  - Click any route segment to highlight it
+  - Highlighted segments increase stroke weight (5 → 8 pixels)
+  - Highlighted segments become fully opaque (0.8 → 1.0 opacity)
+  - Only one segment can be highlighted at a time
+  - Previous highlights automatically reset when clicking a new segment
+- 🎨 Colored numbered markers
+  - Each marker now uses a unique color matching its route segment
+  - 10 distinct, contrasting colors for maximum visibility
+  - Marker 1: Crimson Red, Marker 2: Dodger Blue, Marker 3: Dark Orange, etc.
+  - Final destination marker remains red for clear identification
+  - Better visual correlation between markers and route segments
+- ✨ Enhanced user experience
+  - Easier to focus on specific route segments
+  - Improved visual hierarchy and route comprehension
+  - Works seamlessly in both light and dark modes
 
 ### Version 1.6.2 - January 5, 2026 (Commit: c3bf16b)
 **Fixed dark mode implementation using CSS filters**
