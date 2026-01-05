@@ -89,6 +89,20 @@ Get your API key at: https://console.cloud.google.com/
 
 ## Version History
 
+### Version 1.6.1 - January 5, 2026 (Commit: 8bd221c)
+**Fixed total distance and time info card display**
+- 🐛 Fixed critical bug where total info card was not appearing on the map
+  - Root cause: Info card was placed inside `#map` container and was being cleared by Google Maps API initialization
+  - Solution: Moved `#total-info-card` element to be a sibling of the map container
+- 🎯 Improved info card positioning
+  - Changed from `position: absolute` to `position: fixed`
+  - Implemented proper centering calculation: `calc(350px + (100vw - 350px) / 2)`
+  - Card now perfectly centers over the map area regardless of screen size
+- ✨ Info card now reliably displays total distance and duration
+  - Shows formatted distance (km/m) and time (hrs/mins)
+  - Appears with smooth slide-down animation after route calculation
+  - Glassmorphism design with backdrop blur effect
+
 ### Version 1.6.0 - January 5, 2026 (Commit: 044500a)
 **Added dark mode with synchronized map styling**
 - 🌙 Implemented dark mode toggle button in sidebar
