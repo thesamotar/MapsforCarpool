@@ -208,14 +208,81 @@ button {
     color: var(--text-primary);
 }
 
-.hidden {
-    display: none;
+.hidden,
+.total-info-card.hidden {
+    display: none !important;
 }
 
 #route-list {
     list-style: none;
     margin-top: 10px;
     padding: 0;
+}
+
+.route-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 12px 10px;
+    border-bottom: 1px solid var(--border-color);
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+}
+
+.route-item:hover {
+    background-color: var(--button-secondary-bg);
+}
+
+/* Highlighted state for the selected route segment in the list */
+.route-item.highlighted-segment {
+    background-color: var(--button-secondary-hover);
+    border-left: 4px solid var(--text-primary);
+    padding-left: 6px;
+    /* Adjust padding to account for border */
+}
+
+/* Specific styles for dark mode highlight if needed */
+[data-theme="dark"] .route-item.highlighted-segment {
+    background-color: rgba(66, 133, 244, 0.2);
+    /* Subtle blue tint */
+    border-left-color: #4285F4;
+}
+
+.route-item-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.route-segment-line {
+    width: 30px;
+    height: 4px;
+    flex-shrink: 0;
+    border-radius: 2px;
+    box-shadow: 0 1px 2px var(--shadow-color);
+}
+
+.route-text {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.route-info {
+    display: flex;
+    gap: 15px;
+    margin-left: 40px;
+    font-size: 0.8rem;
+    color: var(--text-tertiary);
+    /* Fixes the dark mode visibility issue */
+}
+
+.route-info-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
 /* Floating Total Info Card */

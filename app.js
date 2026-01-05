@@ -413,6 +413,12 @@ function clearMarkers() {
 function clearPolylines() {
     polylines.forEach(polyline => polyline.setMap(null));
     polylines = [];
+
+    // Hide the info card when there's no route data
+    const totalInfoCard = document.getElementById('total-info-card');
+    if (totalInfoCard) {
+        totalInfoCard.classList.add('hidden');
+    }
 }
 
 /**
@@ -436,6 +442,26 @@ function createColoredPolylines(route) {
     const legs = route.legs;
     let currentlyHighlighted = null;
 
+    // Add map click listener to revert to total info
+    map.addListener('click', () => {
+        // Reset highlighted polyline
+        if (currentlyHighlighted) {
+            currentlyHighlighted.setOptions({
+                strokeWeight: currentlyHighlighted.originalStrokeWeight,
+                strokeOpacity: currentlyHighlighted.originalStrokeOpacity
+            });
+            currentlyHighlighted = null;
+        }
+
+        // Clear list highlighting
+        document.querySelectorAll('.route-item').forEach(item => {
+            item.classList.remove('highlighted-segment');
+        });
+
+        // Revert to total distance and time
+        updateTotalInfoCard(route);
+    });
+
     // Create a polyline for each leg with a different color
     legs.forEach((leg, index) => {
         const path = leg.steps.flatMap(step =>
@@ -456,8 +482,13 @@ function createColoredPolylines(route) {
         polyline.originalStrokeWeight = 5;
         polyline.originalStrokeOpacity = 0.8;
 
-        // Add click event listener for highlighting
-        polyline.addListener('click', () => {
+        // Add click event listener for highlighting and showing segment info
+        polyline.addListener('click', (event) => {
+            // Prevent map click event from firing
+            if (event && event.stop) {
+                event.stop();
+            }
+
             // Reset previously highlighted polyline
             if (currentlyHighlighted && currentlyHighlighted !== polyline) {
                 currentlyHighlighted.setOptions({
@@ -473,6 +504,18 @@ function createColoredPolylines(route) {
             });
 
             currentlyHighlighted = polyline;
+
+            // Highlight corresponding list item
+            document.querySelectorAll('.route-item').forEach(item => {
+                item.classList.remove('highlighted-segment');
+                if (parseInt(item.dataset.segmentIndex) === index) {
+                    item.classList.add('highlighted-segment');
+                    item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            });
+
+            // Update info card with segment-specific data
+            updateInfoCardWithSegment(leg, index + 1);
         });
 
         // Make polyline clickable (show pointer cursor on hover)
@@ -647,6 +690,55 @@ function updateTotalInfoCard(route) {
     totalDistanceEl.textContent = distanceText;
     totalDurationEl.textContent = durationText;
     totalInfoCard.classList.remove('hidden');
+
+    // Update label to show "Total"
+    const infoLabel = document.querySelector('.info-label');
+    if (infoLabel) {
+        infoLabel.textContent = 'Total:';
+    }
+}
+
+/**
+ * Update the info card with segment-specific distance and duration
+ */
+function updateInfoCardWithSegment(leg, segmentNumber) {
+    const totalInfoCard = document.getElementById('total-info-card');
+    const totalDistanceEl = document.getElementById('total-distance');
+    const totalDurationEl = document.getElementById('total-duration');
+    const infoLabel = document.querySelector('.info-label');
+
+    if (!leg) {
+        return;
+    }
+
+    // Format segment distance
+    const distanceMeters = leg.distance.value;
+    const distanceKm = distanceMeters / 1000;
+    const distanceText = distanceKm >= 1
+        ? `${distanceKm.toFixed(1)} km`
+        : `${distanceMeters} m`;
+
+    // Format segment duration
+    const durationSeconds = leg.duration.value;
+    const hours = Math.floor(durationSeconds / 3600);
+    const minutes = Math.floor((durationSeconds % 3600) / 60);
+
+    let durationText = '';
+    if (hours > 0) {
+        durationText = `${hours} hr${hours > 1 ? 's' : ''} ${minutes} min${minutes !== 1 ? 's' : ''}`;
+    } else {
+        durationText = `${minutes} min${minutes !== 1 ? 's' : ''}`;
+    }
+
+    // Update the card
+    totalDistanceEl.textContent = distanceText;
+    totalDurationEl.textContent = durationText;
+    totalInfoCard.classList.remove('hidden');
+
+    // Update label to show segment number
+    if (infoLabel) {
+        infoLabel.textContent = `Segment ${segmentNumber}:`;
+    }
 }
 
 /**
@@ -699,36 +791,31 @@ function displayOptimizedOrder(response, routeData) {
     // Display each leg of the journey with colored line indicators
     legs.forEach((leg, index) => {
         const li = document.createElement('li');
-        li.style.listStyle = 'none';
-        li.style.display = 'flex';
-        li.style.flexDirection = 'column';
-        li.style.gap = '5px';
-        li.style.padding = '12px 0';
-        li.style.borderBottom = '1px solid #f0f0f0';
+        li.className = 'route-item';
+        li.dataset.segmentIndex = index; // Store segment index for highlighting
+
+        // Add click listener to highlight corresponding map segment
+        li.addEventListener('click', () => {
+            if (polylines[index]) {
+                google.maps.event.trigger(polylines[index], 'click', { stop: () => { } });
+            }
+        });
 
         // Container for line and route text
         const routeContainer = document.createElement('div');
-        routeContainer.style.display = 'flex';
-        routeContainer.style.alignItems = 'center';
-        routeContainer.style.gap = '10px';
+        routeContainer.className = 'route-item-content';
 
         // Create colored line indicator
         const colorLine = document.createElement('span');
-        colorLine.style.width = '30px';
-        colorLine.style.height = '4px';
+        colorLine.className = 'route-segment-line';
         colorLine.style.backgroundColor = colors[index % colors.length];
-        colorLine.style.flexShrink = '0';
-        colorLine.style.borderRadius = '2px';
-        colorLine.style.boxShadow = '0 1px 2px rgba(0,0,0,0.2)';
 
         // Create text content - "Place A → Place B" format
         const fromPlace = orderedNames[index];
         const toPlace = orderedNames[index + 1];
         const textSpan = document.createElement('span');
+        textSpan.className = 'route-text';
         textSpan.textContent = `${shortenAddress(fromPlace)} → ${shortenAddress(toPlace)}`;
-        textSpan.style.fontSize = '0.9rem';
-        textSpan.style.lineHeight = '1.4';
-        textSpan.style.fontWeight = '500';
         textSpan.title = `${fromPlace} to ${toPlace}`; // Show full names on hover
 
         routeContainer.appendChild(colorLine);
@@ -736,25 +823,17 @@ function displayOptimizedOrder(response, routeData) {
 
         // Create distance and time info
         const infoContainer = document.createElement('div');
-        infoContainer.style.display = 'flex';
-        infoContainer.style.gap = '15px';
-        infoContainer.style.marginLeft = '40px'; // Align with text
-        infoContainer.style.fontSize = '0.8rem';
-        infoContainer.style.color = '#666';
+        infoContainer.className = 'route-info';
 
         // Distance
         const distanceSpan = document.createElement('span');
+        distanceSpan.className = 'route-info-item';
         distanceSpan.textContent = `📍 ${leg.distance.text}`;
-        distanceSpan.style.display = 'flex';
-        distanceSpan.style.alignItems = 'center';
-        distanceSpan.style.gap = '4px';
 
         // Duration
         const durationSpan = document.createElement('span');
+        durationSpan.className = 'route-info-item';
         durationSpan.textContent = `⏱️ ${leg.duration.text}`;
-        durationSpan.style.display = 'flex';
-        durationSpan.style.alignItems = 'center';
-        durationSpan.style.gap = '4px';
 
         infoContainer.appendChild(distanceSpan);
         infoContainer.appendChild(durationSpan);
