@@ -12,6 +12,7 @@ A web application for optimizing carpool routes with multiple stops. Built with 
 - ➕ **Multiple Waypoints** - Support for up to 8 intermediate stops
 - 📱 **Responsive Design** - Clean, modern UI that works on all devices
 - 🌍 **Geolocation** - Automatically centers map on your current location
+- 🌙 **Dark Mode** - Toggle between light and dark themes with synchronized map styling
 
 ## How It Works
 
@@ -87,6 +88,29 @@ This application requires a Google Maps API key with the following APIs enabled:
 Get your API key at: https://console.cloud.google.com/
 
 ## Version History
+
+### Version 1.6.0 - January 5, 2026 (Commit: 044500a)
+**Added dark mode with synchronized map styling**
+- 🌙 Implemented dark mode toggle button in sidebar
+  - Moon icon (🌙) for switching to dark mode
+  - Sun icon (☀️) for switching back to light mode
+  - Smooth transitions between themes
+- 🎨 CSS custom properties for theme management
+  - Light theme: clean white backgrounds with blue accents
+  - Dark theme: sophisticated dark backgrounds (#1a1a1a) with adjusted colors
+  - All UI elements (sidebar, inputs, buttons) adapt to selected theme
+- 🗺️ Synchronized map styling
+  - Light mode: uses Google Maps default styling with mapId
+  - Dark mode: custom dark map styles with muted colors
+  - Map recreates on theme change to handle Google Maps API restrictions
+  - Dark map features: dark water (#17263c), dark roads (#38414e), subtle labels
+- 💾 Theme persistence using localStorage
+  - User's theme preference saved and restored on page reload
+  - Seamless experience across sessions
+- 🔧 Technical implementation
+  - Conditional map initialization based on theme
+  - Map state preservation during theme switching (zoom, center)
+  - Proper cleanup and reattachment of markers and polylines
 
 ### Version 1.5.0 - January 4, 2026 (Commit: 6971479)
 **Added distance and duration display for route segments**
