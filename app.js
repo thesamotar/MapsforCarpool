@@ -434,6 +434,7 @@ function createColoredPolylines(route) {
     ];
 
     const legs = route.legs;
+    let currentlyHighlighted = null;
 
     // Create a polyline for each leg with a different color
     legs.forEach((leg, index) => {
@@ -441,14 +442,41 @@ function createColoredPolylines(route) {
             google.maps.geometry.encoding.decodePath(step.polyline.points)
         );
 
+        const color = colors[index % colors.length];
         const polyline = new google.maps.Polyline({
             path: path,
             geodesic: true,
-            strokeColor: colors[index % colors.length],
+            strokeColor: color,
             strokeOpacity: 0.8,
             strokeWeight: 5,
             map: map
         });
+
+        // Store original properties for reset
+        polyline.originalStrokeWeight = 5;
+        polyline.originalStrokeOpacity = 0.8;
+
+        // Add click event listener for highlighting
+        polyline.addListener('click', () => {
+            // Reset previously highlighted polyline
+            if (currentlyHighlighted && currentlyHighlighted !== polyline) {
+                currentlyHighlighted.setOptions({
+                    strokeWeight: currentlyHighlighted.originalStrokeWeight,
+                    strokeOpacity: currentlyHighlighted.originalStrokeOpacity
+                });
+            }
+
+            // Highlight the clicked polyline
+            polyline.setOptions({
+                strokeWeight: 8,
+                strokeOpacity: 1.0
+            });
+
+            currentlyHighlighted = polyline;
+        });
+
+        // Make polyline clickable (show pointer cursor on hover)
+        polyline.setOptions({ clickable: true });
 
         polylines.push(polyline);
     });
@@ -461,14 +489,23 @@ async function createNumberedMarkers(route) {
     const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
     const legs = route.legs;
 
+    // Use the same color array as polylines for visual consistency
+    const colors = [
+        '#DC143C', '#1E90FF', '#FF8C00', '#9370DB', '#20B2AA',
+        '#FF1493', '#4169E1', '#32CD32', '#FF4500', '#8B008B'
+    ];
+
     // Add marker for each stop
     legs.forEach((leg, index) => {
-        // Create a pin with a number
+        // Get color for this segment
+        const segmentColor = colors[index % colors.length];
+
+        // Create a pin with a number and matching color
         const pinElement = new PinElement({
             glyph: `${index + 1}`,
             glyphColor: "white",
-            background: "#4285F4",
-            borderColor: "#1a73e8",
+            background: segmentColor,
+            borderColor: segmentColor,
             scale: 1.2
         });
 
@@ -484,6 +521,7 @@ async function createNumberedMarkers(route) {
 
         // Add the final destination marker after the last leg
         if (index === legs.length - 1) {
+            // Final marker uses red to indicate destination
             const finalPinElement = new PinElement({
                 glyph: `${index + 2}`,
                 glyphColor: "white",
