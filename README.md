@@ -90,6 +90,18 @@ Get your API key at: https://console.cloud.google.com/
 
 ## Version History
 
+### Version 1.9.0 - January 7, 2026 (Commit: 9ecb5c4)
+**Added marker click to highlight route segments**
+- 🎯 **Interactive Markers**
+  - Clicking a numbered marker now highlights the route segment from that marker to the next stop
+  - Automatically triggers polyline highlighting for consistent behavior
+  - Updates info card with segment-specific distance and time
+  - Highlights corresponding route list item in sidebar
+- ✨ **Unified Interaction**
+  - Three ways to highlight segments: click markers, click polylines, or click list items
+  - All methods produce identical results for intuitive user experience
+  - Final destination marker has no click handler (no segment after it)
+
 ### Version 1.8.0 - January 6, 2026 (Commit: 12634e5)
 **Added segment details, interactive route list, and fixed dark mode**
 - 📊 **Segment-Specific Info Card**
