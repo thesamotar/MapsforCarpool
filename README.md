@@ -103,10 +103,11 @@ Get your API key at: https://console.cloud.google.com/
   - **CO2 Reduction**: EPA standard of 2.31 kg per liter of gasoline
 - 🎨 **Visual Design**
   - Glassmorphism effect matching top info card
-  - 2x2 grid layout for easy scanning
+  - Compact single-row layout (1x4 grid) for minimal screen coverage
   - Green values to emphasize positive savings
   - Slide-up animation on appearance
   - Full dark mode support
+  - No header for maximum space efficiency
 
 ### Version 1.9.0 - January 7, 2026 (Commit: 9ecb5c4)
 **Added marker click to highlight route segments**
