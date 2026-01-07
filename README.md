@@ -90,6 +90,24 @@ Get your API key at: https://console.cloud.google.com/
 
 ## Version History
 
+### Version 2.0.0 - January 7, 2026 (Commit: 27cef2b)
+**Added savings comparison card showing optimization benefits**
+- 💡 **Savings Comparison Card**
+  - Displays at bottom of map showing benefits of route optimization
+  - Compares optimized route with user's original entry order
+  - Shows 4 key metrics: Distance, Time, Fuel, and CO2 savings
+  - Only appears when optimization provides actual improvements
+- 📊 **Detailed Calculations**
+  - **Distance & Time**: Direct comparison between routes
+  - **Fuel Savings**: Based on 25 MPG (10.6 km/L) average efficiency
+  - **CO2 Reduction**: EPA standard of 2.31 kg per liter of gasoline
+- 🎨 **Visual Design**
+  - Glassmorphism effect matching top info card
+  - 2x2 grid layout for easy scanning
+  - Green values to emphasize positive savings
+  - Slide-up animation on appearance
+  - Full dark mode support
+
 ### Version 1.9.0 - January 7, 2026 (Commit: 9ecb5c4)
 **Added marker click to highlight route segments**
 - 🎯 **Interactive Markers**
