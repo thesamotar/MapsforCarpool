@@ -353,3 +353,88 @@ button {
         transform: translateX(-50%) translateY(0);
     }
 }
+
+/* Savings Comparison Card */
+.savings-card {
+    position: fixed;
+    bottom: 20px;
+    left: calc(350px + (100vw - 350px) / 2);
+    transform: translateX(-50%);
+    z-index: 1000;
+
+    /* Glassmorphism effect */
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    border-radius: 12px;
+    padding: 16px 20px;
+    box-shadow: 0 4px 12px var(--shadow-color), 0 2px 4px var(--shadow-medium);
+
+    transition: all 0.3s ease;
+    animation: slideUp 0.4s ease-out;
+    min-width: 500px;
+}
+
+[data-theme="dark"] .savings-card {
+    background: rgba(26, 26, 26, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.savings-card:hover {
+    transform: translateX(-50%) translateY(-2px);
+    box-shadow: 0 6px 16px var(--shadow-color), 0 3px 6px var(--shadow-medium);
+}
+
+.savings-header {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.savings-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.saving-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.saving-icon {
+    font-size: 1.3rem;
+}
+
+.saving-value {
+    font-weight: 700;
+    color: #34A853;
+    font-size: 1.1rem;
+}
+
+[data-theme="dark"] .saving-value {
+    color: #5BB974;
+}
+
+.saving-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}

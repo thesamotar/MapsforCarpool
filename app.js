@@ -382,21 +382,120 @@ async function optimizeAndDisplayRoute() {
             optimizeWaypoints: true,
             travelMode: google.maps.TravelMode.DRIVING,
         },
-        (response, status) => {
+        (optimizedResponse, status) => {
             if (status === "OK") {
                 // Display the route on the map
-                directionsRenderer.setDirections(response);
+                directionsRenderer.setDirections(optimizedResponse);
 
                 // Display the optimized order in the sidebar with original names
-                displayOptimizedOrder(response, routeData);
+                displayOptimizedOrder(optimizedResponse, routeData);
 
                 console.log("Route optimized successfully");
+
+                // Calculate unoptimized route for comparison (only if there are waypoints)
+                if (routeData.waypoints.length > 0) {
+                    calculateUnoptimizedRoute(routeData, optimizedResponse);
+                }
             } else {
                 console.error("Directions request failed:", status);
                 alert(`Failed to calculate route: ${status}`);
             }
         }
     );
+}
+
+/**
+ * Calculate the unoptimized route (original order) for comparison
+ */
+function calculateUnoptimizedRoute(routeData, optimizedResponse) {
+    directionsService.route(
+        {
+            origin: routeData.origin,
+            destination: routeData.destination,
+            waypoints: routeData.waypoints,
+            optimizeWaypoints: false, // Use original order
+            travelMode: google.maps.TravelMode.DRIVING,
+        },
+        (unoptimizedResponse, status) => {
+            if (status === "OK") {
+                // Compare optimized vs unoptimized
+                displaySavings(optimizedResponse, unoptimizedResponse);
+            } else {
+                console.error("Unoptimized route calculation failed:", status);
+                // Hide savings card if we can't calculate comparison
+                const savingsCard = document.getElementById('savings-card');
+                if (savingsCard) {
+                    savingsCard.classList.add('hidden');
+                }
+            }
+        }
+    );
+}
+
+/**
+ * Display savings comparison between optimized and unoptimized routes
+ */
+function displaySavings(optimizedResponse, unoptimizedResponse) {
+    const savingsCard = document.getElementById('savings-card');
+
+    // Calculate totals for optimized route
+    let optimizedDistance = 0;
+    let optimizedDuration = 0;
+    optimizedResponse.routes[0].legs.forEach(leg => {
+        optimizedDistance += leg.distance.value; // in meters
+        optimizedDuration += leg.duration.value; // in seconds
+    });
+
+    // Calculate totals for unoptimized route
+    let unoptimizedDistance = 0;
+    let unoptimizedDuration = 0;
+    unoptimizedResponse.routes[0].legs.forEach(leg => {
+        unoptimizedDistance += leg.distance.value; // in meters
+        unoptimizedDuration += leg.duration.value; // in seconds
+    });
+
+    // Calculate savings
+    const distanceSavedMeters = unoptimizedDistance - optimizedDistance;
+    const timeSavedSeconds = unoptimizedDuration - optimizedDuration;
+
+    // Only show savings if there's actual improvement
+    if (distanceSavedMeters <= 0 && timeSavedSeconds <= 0) {
+        savingsCard.classList.add('hidden');
+        return;
+    }
+
+    // Format distance saved
+    const distanceSavedKm = distanceSavedMeters / 1000;
+    const distanceText = distanceSavedKm >= 1
+        ? `${distanceSavedKm.toFixed(1)} km`
+        : `${distanceSavedMeters} m`;
+
+    // Format time saved
+    const hoursSaved = Math.floor(timeSavedSeconds / 3600);
+    const minutesSaved = Math.floor((timeSavedSeconds % 3600) / 60);
+    let timeText = '';
+    if (hoursSaved > 0) {
+        timeText = `${hoursSaved} hr ${minutesSaved} min`;
+    } else {
+        timeText = `${minutesSaved} min`;
+    }
+
+    // Calculate fuel saved (assuming 10.6 km/L average fuel efficiency)
+    const fuelSavedLiters = distanceSavedKm / 10.6;
+    const fuelText = `${fuelSavedLiters.toFixed(2)} L`;
+
+    // Calculate CO2 saved (2.31 kg CO2 per liter of gasoline)
+    const co2SavedKg = fuelSavedLiters * 2.31;
+    const co2Text = `${co2SavedKg.toFixed(2)} kg`;
+
+    // Update UI
+    document.getElementById('distance-saved').textContent = distanceText;
+    document.getElementById('time-saved').textContent = timeText;
+    document.getElementById('fuel-saved').textContent = fuelText;
+    document.getElementById('co2-saved').textContent = co2Text;
+
+    // Show the card
+    savingsCard.classList.remove('hidden');
 }
 
 /**
@@ -418,6 +517,12 @@ function clearPolylines() {
     const totalInfoCard = document.getElementById('total-info-card');
     if (totalInfoCard) {
         totalInfoCard.classList.add('hidden');
+    }
+
+    // Hide the savings card when there's no route data
+    const savingsCard = document.getElementById('savings-card');
+    if (savingsCard) {
+        savingsCard.classList.add('hidden');
     }
 }
 
