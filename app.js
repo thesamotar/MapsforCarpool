@@ -560,6 +560,14 @@ async function createNumberedMarkers(route) {
             title: `Stop ${index + 1}: ${leg.start_address}`
         });
 
+        // Add click listener to highlight the route segment FROM this marker TO the next
+        marker.addListener('click', () => {
+            // Trigger click on the corresponding polyline (segment starting from this marker)
+            if (polylines[index]) {
+                google.maps.event.trigger(polylines[index], 'click', { stop: () => { } });
+            }
+        });
+
         markers.push(marker);
 
         // Add the final destination marker after the last leg
@@ -579,6 +587,8 @@ async function createNumberedMarkers(route) {
                 content: finalPinElement.element,
                 title: `Stop ${index + 2}: ${leg.end_address}`
             });
+
+            // Final destination marker doesn't have a segment after it, so no click handler needed
 
             markers.push(finalMarker);
         }
